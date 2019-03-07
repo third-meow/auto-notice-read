@@ -1,3 +1,4 @@
+import sys
 import urllib.request as urlr
 from bs4 import BeautifulSoup as soup
 
@@ -59,6 +60,34 @@ def get_notice_data(url):
 
     return notices
 
+def get_keywords():
+    keywords = []
+
+    if '-u' in sys.argv:
+        # receive keywords from user
+        print('Enter keywords, one per line. Enter DONE to finished')
+        cmd = input()
+        while(cmd != 'DONE'):
+            keywords.append(cmd.strip().lower())
+            cmd = input()
+    else:
+        # read keywords from file
+        with open('keywords.txt', 'r') as f:
+            contents = f.read().split('\n')
+
+        # remove commented lines
+        for line in contents:
+            if '#' in line:
+                position = line.find('#')
+                keywords.append(line[:position].strip())
+            else:
+                keywords.append(line.strip())
+
+    # remove blank lines
+    keywords = [keyword for keyword in keywords if keyword != '']
+
+
+    return keywords
 
 def main():
     # notices page url
@@ -67,7 +96,13 @@ def main():
     # scrape page
     notices = get_notice_data(notices_url)
 
-    print(notices[0].to_string())
+    # search keywords array
+    keywords = get_keywords()
+
+    print(keywords)
+    
+    # search 
+
 
 
 if __name__ == '__main__':
