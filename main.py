@@ -2,9 +2,10 @@ import sys
 import urllib.request as urlr
 from bs4 import BeautifulSoup as soup
 
+
 class Notice:
     def __init__(self, first_row, second_row):
-        # split first row into table cells 
+        # split first row into table cells
         first_row = first_row.find_all('td')
         # set title
         self.title = first_row[1].text.lower()
@@ -18,15 +19,20 @@ class Notice:
         else:
             self.room = None
             self.time = None
-        
+
         # set detail
         self.detail = second_row.find('td').text
 
     def to_string(self):
-        if self.room != None:
-            return f'{self.title} - {self.room} - {self.time}\n{self.detail}\n{self.staff}'
+        if self.room is not None:
+            return f'{self.title} - {self.room} - {self.time}\n \
+                    {self.detail}\n \
+                    {self.staff}'
         else:
-            return f'{self.title}\n{self.detial}\n{self.staff}'
+            return f'{self.title}\n{self.detail}\n{self.staff}'
+
+    def selfprint(self):
+        print(self.to_string())
 
 
 def get_notice_data(url):
@@ -37,7 +43,9 @@ def get_notice_data(url):
     page_soup = soup(page, 'html.parser')
 
     # get both notice tables
-    notice_tables = page_soup.find_all('div', attrs={'class':'table-responsive'})
+    notice_tables = page_soup.find_all(
+        'div',
+        attrs={'class': 'table-responsive'})
 
     # put notices into objects
     notices = []
@@ -59,6 +67,7 @@ def get_notice_data(url):
             notices.append(notice)
 
     return notices
+
 
 def get_keywords():
     keywords = []
@@ -86,8 +95,20 @@ def get_keywords():
     # remove blank lines
     keywords = [keyword for keyword in keywords if keyword != '']
 
-
     return keywords
+
+
+def find_relevent_notices(notices, keywords):
+    relevent = []
+    for notice in notices:
+        for keyword in keywords:
+            if keyword in notice.title or keyword in notice.detail:
+                # add notice to relevent list
+                relevent.append(notice)
+                break
+
+    return relevent
+
 
 def main():
     # notices page url
@@ -99,10 +120,11 @@ def main():
     # search keywords array
     keywords = get_keywords()
 
-    print(keywords)
-    
-    # search 
+    # search notices for keywords
+    relevent_notices = find_relevent_notices(notices, keywords)
 
+    for rvn in relevent_notices:
+        rvn.selfprint()
 
 
 if __name__ == '__main__':
